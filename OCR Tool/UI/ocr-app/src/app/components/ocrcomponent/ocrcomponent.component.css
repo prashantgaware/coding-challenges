@@ -1,0 +1,62 @@
+.container {
+  text-align: center;
+  margin-top: 50px;
+  font-family: Arial, sans-serif;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+h1 {
+  color: #4caf50;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+input[type="file"] {
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: #4caf50;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+input[type="file"]:hover {
+  background-color: #45a049;
+}
+
+.loading p {
+  font-size: 1.2rem;
+  color: #ff9800;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+.result {
+  margin-top: 30px;
+  text-align: left;
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.result h2 {
+  color: #333;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.result p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.5;
+}

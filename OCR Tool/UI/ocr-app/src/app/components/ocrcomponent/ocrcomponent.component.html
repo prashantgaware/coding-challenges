@@ -1,0 +1,11 @@
+<div class="container">
+  <h1>OCR Tool</h1>
+  <input type="file" (change)="onFileSelected($event)" />
+  <div *ngIf="isLoading" class="loading">
+    <p>Processing...</p>
+  </div>
+  <div *ngIf="extractedText" class="result">
+    <h2>Extracted Text:</h2>
+    <p>{{ extractedText }}</p>
+  </div>
+</div>
