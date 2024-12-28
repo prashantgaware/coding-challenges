@@ -1,0 +1,6 @@
+@Json_Parser_HostAddress = http://localhost:5171
+
+GET {{Json_Parser_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

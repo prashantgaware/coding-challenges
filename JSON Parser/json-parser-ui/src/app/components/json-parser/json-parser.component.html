@@ -1,0 +1,33 @@
+<div class="container">
+  <h1>JSON Parser</h1>
+
+  <textarea
+    [(ngModel)]="jsonInput"
+    class="json-input"
+    rows="10"
+    cols="50"
+    placeholder="Enter JSON here"
+  ></textarea>
+  <br />
+
+  <div class="button-group">
+    <button (click)="validateJson()" class="btn validate-btn">
+      Validate JSON
+    </button>
+    <button (click)="parseJson()" class="btn parse-btn">Parse JSON</button>
+  </div>
+
+  <div *ngIf="result" class="result">
+    <div class="result-header">
+      <h3>Result:</h3>
+      <button
+        class="copy-btn"
+        (click)="copyResultToClipboard()"
+        title="Copy JSON"
+      >
+        📋
+      </button>
+    </div>
+    <pre class="result-box">{{ result | json }}</pre>
+  </div>
+</div>
