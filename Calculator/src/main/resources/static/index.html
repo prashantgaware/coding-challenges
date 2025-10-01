@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Calculator</title>
+    <style>
+        /* Basic styling for the entire page */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        /* Container for the calculator */
+        .calculator {
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            width: 320px;
+        }
+
+        /* Display screen of the calculator */
+        .calculator-screen {
+            width: 100%;
+            height: 80px;
+            border: none;
+            background-color: #222;
+            color: #fff;
+            text-align: right;
+            padding: 20px;
+            font-size: 2.5rem;
+            box-sizing: border-box;
+        }
+
+        /* Grid layout for the calculator buttons */
+        .calculator-keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1px;
+        }
+
+        /* General styling for all buttons */
+        button {
+            height: 80px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #f9f9f9;
+        }
+
+        button:active {
+            background-color: #eee;
+        }
+
+        /* Specific styling for operator buttons */
+        .operator {
+            background-color: #f9a825;
+            color: white;
+        }
+
+        .operator:hover {
+            background-color: #fb8c00;
+        }
+
+        .operator:active {
+            background-color: #ef6c00;
+        }
+
+        /* Specific styling for the 'All Clear' (AC) button */
+        .all-clear {
+            background-color: #e53935;
+            color: white;
+        }
+
+        .all-clear:hover {
+            background-color: #d32f2f;
+        }
+
+        .all-clear:active {
+            background-color: #c62828;
+        }
+
+        /* Styling for the equal sign button, making it span two rows */
+        .equal-sign {
+            background-color: #43a047;
+            color: white;
+            grid-row: span 2;
+        }
+
+        .equal-sign:hover {
+            background-color: #388e3c;
+        }
+
+        .equal-sign:active {
+            background-color: #2e7d32;
+        }
+
+        /* Styling for function buttons (sin, cos, tan) */
+        .function {
+            background-color: #546e7a;
+            color: white;
+        }
+
+        .function:hover {
+            background-color: #455a64;
+        }
+
+        .function:active {
+            background-color: #37474f;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator">
+    <input type="text" class="calculator-screen" value="" disabled />
+    <div class="calculator-keys">
+        <!-- Row 1: Functions and Clear -->
+        <button type="button" class="function" value="sin(">sin</button>
+        <button type="button" class="function" value="cos(">cos</button>
+        <button type="button" class="function" value="tan(">tan</button>
+        <button type="button" class="all-clear" value="all-clear">AC</button>
+
+        <!-- Row 2: Numbers and Operators -->
+        <button type="button" value="7">7</button>
+        <button type="button" value="8">8</button>
+        <button type="button" value="9">9</button>
+        <button type="button" class="operator" value="/">&divide;</button>
+
+        <!-- Row 3: Numbers and Operators -->
+        <button type="button" value="4">4</button>
+        <button type="button" value="5">5</button>
+        <button type="button" value="6">6</button>
+        <button type="button" class="operator" value="*">&times;</button>
+
+        <!-- Row 4: Numbers and Operators -->
+        <button type="button" value="1">1</button>
+        <button type="button" value="2">2</button>
+        <button type="button" value="3">3</button>
+        <button type="button" class="operator" value="-">-</button>
+
+        <!-- Row 5: Numbers, Decimal, and Operators -->
+        <button type="button" value="0">0</button>
+        <button type="button" value=".">.</button>
+        <button type="button" class="equal-sign" value="=">=</button>
+        <button type="button" class="operator" value="+">+</button>
+        <button type="button" value="(">(</button>
+        <button type="button" value=")">)</button>
+    </div>
+</div>
+
+<script>
+    // Get references to the calculator screen and keys
+    const calculatorScreen = document.querySelector('.calculator-screen');
+    const calculatorKeys = document.querySelector('.calculator-keys');
+
+    // Add a click event listener to the keys container
+    calculatorKeys.addEventListener('click', e => {
+        // Ensure a button was clicked
+        if (e.target.matches('button')) {
+            const key = e.target;
+            const action = key.value;
+
+            // Handle number and operator clicks
+            if (!action.includes('clear') && !action.includes('=')) {
+                calculatorScreen.value += action;
+            }
+
+            // Handle the decimal point
+            if (action === '.') {
+                // Prevent adding multiple decimals
+                if (!calculatorScreen.value.slice(0, -1).includes('.')) {
+                    // Logic to handle decimal point can be improved
+                }
+            }
+
+            // Handle the 'AC' (All Clear) button
+            if (action === 'all-clear') {
+                calculatorScreen.value = '';
+            }
+
+            // Handle the '=' (equals) button
+            if (action === '=') {
+                const expression = calculatorScreen.value;
+
+                // Make a POST request to the backend API to calculate the result
+                fetch('/api/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ expression: expression }),
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            // If response is not OK, parse the error message
+                            return response.json().then(err => { throw new Error(err.error) });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Display the result on the screen
+                        calculatorScreen.value = data.result;
+                    })
+                    .catch(error => {
+                        // Display an error message if the calculation fails
+                        console.error('Error:', error);
+                        calculatorScreen.value = 'Error';
+                    });
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
