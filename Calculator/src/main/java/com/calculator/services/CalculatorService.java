@@ -44,7 +44,8 @@ public class CalculatorService {
     private List<String> tokenize(String expression) {
         List<String> tokens = new ArrayList<>();
         // Regex to find numbers (including decimals), operators, parentheses, and functions
-        Pattern pattern = Pattern.compile("-?\\d*\\.?\\d+|[+*/()-]|sin|cos|tan");
+        // Note: We match numbers without leading minus to handle subtraction correctly
+        Pattern pattern = Pattern.compile("\\d+\\.?\\d*|[+\\-*/()]|sin|cos|tan");
         Matcher matcher = pattern.matcher(expression);
         while (matcher.find()) {
             tokens.add(matcher.group());

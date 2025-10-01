@@ -90,11 +90,11 @@
             background-color: #c62828;
         }
 
-        /* Styling for the equal sign button, making it span two rows */
+        /* Styling for the equal sign button */
         .equal-sign {
             background-color: #43a047;
             color: white;
-            grid-row: span 2;
+            grid-column: span 2;
         }
 
         .equal-sign:hover {
@@ -103,6 +103,20 @@
 
         .equal-sign:active {
             background-color: #2e7d32;
+        }
+        
+        /* Styling for the backspace button */
+        .backspace {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .backspace:hover {
+            background-color: #fb8c00;
+        }
+
+        .backspace:active {
+            background-color: #f57c00;
         }
 
         /* Styling for function buttons (sin, cos, tan) */
@@ -150,12 +164,15 @@
         <button type="button" class="operator" value="-">-</button>
 
         <!-- Row 5: Numbers, Decimal, and Operators -->
-        <button type="button" value="0">0</button>
-        <button type="button" value=".">.</button>
-        <button type="button" class="equal-sign" value="=">=</button>
-        <button type="button" class="operator" value="+">+</button>
         <button type="button" value="(">(</button>
         <button type="button" value=")">)</button>
+        <button type="button" value="0">0</button>
+        <button type="button" class="operator" value="+">+</button>
+        
+        <!-- Row 6: Decimal, Backspace, and Equal -->
+        <button type="button" value=".">.</button>
+        <button type="button" class="backspace" value="backspace">&larr;</button>
+        <button type="button" class="equal-sign" value="=">=</button>
     </div>
 </div>
 
@@ -164,60 +181,106 @@
     const calculatorScreen = document.querySelector('.calculator-screen');
     const calculatorKeys = document.querySelector('.calculator-keys');
 
+    // Helper function to get the current number being entered
+    function getCurrentNumber() {
+        const value = calculatorScreen.value;
+        const match = value.match(/[\d.]+$/);
+        return match ? match[0] : '';
+    }
+
+    // Helper function to handle button action
+    function handleAction(action) {
+        // Handle the 'AC' (All Clear) button
+        if (action === 'all-clear') {
+            calculatorScreen.value = '';
+            return;
+        }
+
+        // Handle the backspace button
+        if (action === 'backspace') {
+            calculatorScreen.value = calculatorScreen.value.slice(0, -1);
+            return;
+        }
+
+        // Handle the '=' (equals) button
+        if (action === '=') {
+            const expression = calculatorScreen.value;
+            if (!expression) return;
+
+            // Make a POST request to the backend API to calculate the result
+            fetch('/api/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ expression: expression }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        // If response is not OK, parse the error message
+                        return response.json().then(err => { throw new Error(err.error) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Display the result on the screen
+                    calculatorScreen.value = data.result;
+                })
+                .catch(error => {
+                    // Display an error message if the calculation fails
+                    console.error('Error:', error);
+                    calculatorScreen.value = 'Error';
+                });
+            return;
+        }
+
+        // Handle the decimal point - prevent multiple decimals in the same number
+        if (action === '.') {
+            const currentNumber = getCurrentNumber();
+            // Don't add decimal if the current number already has one
+            if (currentNumber.includes('.')) {
+                return;
+            }
+            // If the screen is empty or ends with an operator, add "0." for clarity
+            if (!calculatorScreen.value || /[+\-*/()]$/.test(calculatorScreen.value)) {
+                calculatorScreen.value += '0.';
+                return;
+            }
+        }
+
+        // Handle number and operator clicks
+        calculatorScreen.value += action;
+    }
+
     // Add a click event listener to the keys container
     calculatorKeys.addEventListener('click', e => {
         // Ensure a button was clicked
         if (e.target.matches('button')) {
             const key = e.target;
             const action = key.value;
+            handleAction(action);
+        }
+    });
 
-            // Handle number and operator clicks
-            if (!action.includes('clear') && !action.includes('=')) {
-                calculatorScreen.value += action;
-            }
+    // Add keyboard support
+    document.addEventListener('keydown', e => {
+        e.preventDefault();
+        
+        // Map keyboard keys to calculator actions
+        const keyMap = {
+            '0': '0', '1': '1', '2': '2', '3': '3', '4': '4',
+            '5': '5', '6': '6', '7': '7', '8': '8', '9': '9',
+            '+': '+', '-': '-', '*': '*', '/': '/',
+            '.': '.', '(': '(', ')': ')',
+            'Enter': '=', '=': '=',
+            'Escape': 'all-clear',
+            'Backspace': 'backspace',
+            'Delete': 'backspace'
+        };
 
-            // Handle the decimal point
-            if (action === '.') {
-                // Prevent adding multiple decimals
-                if (!calculatorScreen.value.slice(0, -1).includes('.')) {
-                    // Logic to handle decimal point can be improved
-                }
-            }
-
-            // Handle the 'AC' (All Clear) button
-            if (action === 'all-clear') {
-                calculatorScreen.value = '';
-            }
-
-            // Handle the '=' (equals) button
-            if (action === '=') {
-                const expression = calculatorScreen.value;
-
-                // Make a POST request to the backend API to calculate the result
-                fetch('/api/calculate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ expression: expression }),
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            // If response is not OK, parse the error message
-                            return response.json().then(err => { throw new Error(err.error) });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        // Display the result on the screen
-                        calculatorScreen.value = data.result;
-                    })
-                    .catch(error => {
-                        // Display an error message if the calculation fails
-                        console.error('Error:', error);
-                        calculatorScreen.value = 'Error';
-                    });
-            }
+        const action = keyMap[e.key];
+        if (action) {
+            handleAction(action);
         }
     });
 </script>
